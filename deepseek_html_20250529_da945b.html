@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK LEGEND | Elite Hacker Network</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #000;
+            color: #0f0;
+            overflow-x: hidden;
+            position: relative;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2300ff00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>'), auto;
+        }
+        
+        /* === MATRIX BACKGROUND === */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.2;
+        }
+        
+        /* === HACKER GRID LINES === */
+        #grid-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+        
+        /* === 3D FLOATING HACKER SYMBOLS === */
+        #floating-hacker-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .hacker-symbol {
+            position: absolute;
+            color: #0f0;
+            font-size: 24px;
+            opacity: 0.5;
+            animation: float 10s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+        
+        /* === MAIN CONTAINER === */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* === GLOWING HEADER === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #0f0;
+            margin-bottom: 30px;
+            animation: pulse 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.7); }
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #0f0, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* === NAVIGATION === */
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            color: #0f0;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        nav ul li a:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #0f0;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        nav ul li a:hover::after {
+            transform: scaleX(1);
+        }
+        
+        /* === HERO SECTION === */
+        .hero {
+            text-align: center;
+            padding: 100px 0;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(90deg, #0f0, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flicker 1.5s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+        
+        /* === CTA BUTTONS === */
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #0f0, #000);
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #0f0;
+        }
+        
+        .cta-button:hover {
+            background: linear-gradient(45deg, #000, #0f0);
+            color: #0f0;
+            box-shadow: 0 0 15px #0f0;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        /* === TERMINAL WINDOW === */
+        .terminal {
+            background-color: rgba(0, 20, 0, 0.3);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 50px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #0f0;
+        }
+        
+        .terminal-dots {
+            display: flex;
+            margin-right: 15px;
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .terminal-dot.red {
+            background-color: #ff5f56;
+        }
+        
+        .terminal-dot.yellow {
+            background-color: #ffbd2e;
+        }
+        
+        .terminal-dot.green {
+            background-color: #27c93f;
+        }
+        
+        .terminal-title {
+            flex-grow: 1;
+            text-align: center;
+            color: #0f0;
+        }
+        
+        .terminal-body {
+            line-height: 1.6;
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .terminal-prompt {
+            color: #0f0;
+            margin-right: 10px;
+        }
+        
+        .terminal-command {
+            color: #0f0;
+        }
+        
+        .terminal-output {
+            color: #fff;
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #0f0;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* === SERVICE CARDS (MOVING & GLOWING) === */
+        .services {
+            padding: 50px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            color: #0f0;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: #0f0;
+        }
+        
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            background-color: rgba(15, 15, 15, 0.7);
+            border: 1px solid #0f0;
+            padding: 30px;
+            border-radius: 5px;
+            transition: all 0.5s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px) rotate(1deg);
+            box-shadow: 0 15px 30px rgba(0, 255, 0, 0.3);
+            border-color: #fff;
+        }
+        
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 0, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+        
+        .service-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #0f0;
+        }
+        
+        .service-card p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+        
+        .price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0f0;
+            margin-bottom: 15px;
+        }
+        
+        .buy-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: transparent;
+            color: #0f0;
+            border: 1px solid #0f0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .buy-button:hover {
+            background-color: #0f0;
+            color: #000;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        /* === FAKE SECURITY WARNINGS === */
+        .security-warning {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid #f00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            animation: warning-pulse 2s infinite;
+        }
+        
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .security-warning h3 {
+            color: #f00;
+            margin-bottom: 10px;
+        }
+        
+        /* === CONTACT SECTION === */
+        .contact {
+            padding: 50px 0;
+            text-align: center;
+        }
+        
+        .contact-info {
+            margin-top: 30px;
+        }
+        
+        .contact-info p {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+        
+        .contact-info a {
+            color: #0f0;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .contact-info a:hover {
+            color: #fff;
+            text-decoration: underline;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        /* === FOOTER (HIDDEN DEVELOPER NAME) === */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #0f0;
+            margin-top: 50px;
+            position: relative;
+        }
+        
+        footer p {
+            color: #333;
+            font-size: 0.8rem;
+        }
+        
+        footer p:hover {
+            color: #0f0;
+        }
+        
+        /* === HACKING ANIMATION WINDOW === */
+        .hacking-animation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 150px;
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        .hacking-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0a0;
+        }
+        
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hacking-animation {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- === MATRIX BACKGROUND === -->
+    <canvas id="matrix-bg"></canvas>
+    
+    <!-- === HACKER GRID LINES === -->
+    <div id="grid-lines"></div>
+    
+    <!-- === 3D FLOATING HACKER SYMBOLS === -->
+    <div id="floating-hacker-elements"></div>
+    
+    <!-- === MAIN CONTAINER === -->
+    <div class="container">
+        <header>
+            <div class="logo">DARK LEGEND</div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#panels">Panels</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- === HERO SECTION === -->
+        <section class="hero" id="home">
+            <h1>ELITE HACKER SERVICES</h1>
+            <p>Access the most powerful hacking tools, social media services, and cybersecurity solutions. Dark Legend provides elite services with 100% anonymity.</p>
+            <a href="#contact" class="cta-button">GET STARTED</a>
+            <a href="#services" class="cta-button">VIEW SERVICES</a>
+        </section>
+        
+        <!-- === FAKE SECURITY WARNING === -->
+        <div class="security-warning">
+            <h3>⚠️ WARNING: UNAUTHORIZED ACCESS DETECTED</h3>
+            <p>This website is protected by Dark Legend Security Protocol. Any unauthorized attempts will be logged and traced.</p>
+        </div>
+        
+        <!-- === TERMINAL WINDOW === -->
+        <section class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                </div>
+                <div class="terminal-title">root@darklegend:~</div>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">root@darklegend:~$</span>
+                    <span class="terminal-command">sudo activate elite_mode</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-output">Initializing Dark Legend Protocol v4.2.1...</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-output">Bypassing security firewalls...</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-output">Establishing encrypted connection...</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-output">Connection secured. Welcome back, ADMIN.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">root@darklegend:~$</span>
+                    <span class="terminal-command">_</span>
+                    <span class="terminal-cursor"></span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- === SERVICES SECTION === -->
+        <section class="services" id="services">
+            <h2 class="section-title">Our Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <h3>Social Media Boost</h3>
+                    <p>Increase followers, likes, views on Instagram, TikTok, YouTube, Facebook, and more.</p>
+                    <div class="price">Starting at $5</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Elite Hacking Tools</h3>
+                    <p>Mobile/PC hacking, WiFi cracking, SIM database access, and more.</p>
+                    <div class="price">Starting at $20</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Premium Accounts</h3>
+                    <p>Netflix, Spotify, Canva, YouTube Premium, and more at cheap prices.</p>
+                    <div class="price">Starting at $10</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Pterodactyl Panels</h3>
+                    <p>1GB to 32GB panels, unlimited access, VPS services.</p>
+                    <div class="price">Starting at $15</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Bug & Scripts</h3>
+                    <p>MD scripts, SC scripts, C-panel scripts, bot deployment.</p>
+                    <div class="price">Starting at $25</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Hacking Courses</h3>
+                    <p>Termux, Kali Linux, carding, digital marketing, and more.</p>
+                    <div class="price">Starting at $30</div>
+                    <a href="https://wa.me/933305517972" class="buy-button">Order Now</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- === CONTACT SECTION === -->
+        <section class="contact" id="contact">
+            <h2 class="section-title">Contact Dark Legend</h2>
+            <p>For all inquiries and orders, contact us directly via WhatsApp</p>
+            <div class="contact-info">
+                <p>WhatsApp: <a href="https://wa.me/933305517972">+92 333 05517972</a></p>
+                <p>Channel: <a href="https://whatsapp.com/channel/0029VbAiUoHI1rcobAYLwS2H">Dark Legend Official</a></p>
+            </div>
+            <a href="https://wa.me/933305517972" class="cta-button">CONTACT NOW</a>
+        </section>
+        
+        <!-- === FOOTER (HIDDEN DEVELOPER CREDIT) === -->
+        <footer>
+            <p>Developed by <span style="color: #333;">Hafiz Muhammad Ali</span></p>
+        </footer>
+    </div>
+    
+    <!-- === HACKING ANIMATION WINDOW === -->
+    <div class="hacking-animation">
+        <div class="hacking-text" id="hacking-text"></div>
+    </div>
+    
+    <!-- === FONT AWESOME (ICONS) === -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <!-- === MATRIX BACKGROUND SCRIPT === -->
+    <script>
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const symbols = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+        
+        const alphabet = katakana + latin + nums + symbols;
+        
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        
+        const rainDrops = [];
+        
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+        
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+        
+        setInterval(draw, 30);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+    
+    <!-- === FLOATING HACKER SYMBOLS === -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const symbols = ['{}', '[]', '()', '<>', '#', '$', '%', '&', '*', '!', '?', ';', ':', '/', '\\', '|'];
+            const container = document.getElementById('floating-hacker-elements');
+            
+            for (let i = 0; i < 30; i++) {
+                const symbol = document.createElement('div');
+                symbol.className = 'hacker-symbol';
+                symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                // Random position
+                symbol.style.left = `${Math.random() * 100}vw`;
+                symbol.style.top = `${Math.random() * 100}vh`;
+                
+                // Random animation delay
+                symbol.style.animationDelay = `${Math.random() * 10}s`;
+                
+                container.appendChild(symbol);
+            }
+        });
+    </script>
+    
+    <!-- === HACKING TERMINAL ANIMATION === -->
+    <script>
+        const hackingText = document.getElementById('hacking-text');
+        const hackingLines = [
+            "Initializing Dark Legend Protocol v4.2.1...",
+            "Bypassing security firewalls...",
+            "Accessing mainframe...",
+            "Injecting payload into target system...",
+            "Exploiting zero-day vulnerability...",
+            "Root access granted.",
+            "Deploying custom scripts...",
+            "Overwriting system logs...",
+            "Covering tracks...",
+            "Operation completed successfully."
+        ];
+        
+        let currentLine = 0;
+        
+        function addHackingLine() {
+            if (currentLine < hackingLines.length) {
+                const line = document.createElement('div');
+                line.textContent = hackingLines[currentLine];
+                line.style.color = '#0f0';
+                line.style.marginBottom = '5px';
+                hackingText.appendChild(line);
+                currentLine++;
+                
+                // Scroll to bottom
+                hackingText.scrollTop = hackingText.scrollHeight;
+                
+                // Random interval for next line
+                setTimeout(addHackingLine, Math.random() * 2000 + 500);
+            } else {
+                // Restart animation
+                currentLine = 0;
+                hackingText.innerHTML = '';
+                setTimeout(addHackingLine, 1000);
+            }
+        }
+        
+        // Start animation
+        setTimeout(addHackingLine, 1000);
+    </script>
+    
+    <!-- === GSAP ANIMATIONS (MOVING CARDS) === -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Register ScrollTrigger plugin
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animate service cards on scroll
+            gsap.utils.toArray('.service-card').forEach((card, index) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.8,
+                    delay: index * 0.1,
+                    ease: "power2.out"
+                });
+            });
+            
+            // Animate terminal
+            gsap.from('.terminal', {
+                scrollTrigger: {
+                    trigger: '.terminal',
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                },
+                x: -100,
+                opacity: 0,
+                duration: 1,
+                ease: "power2.out"
+            });
+            
+            // Animate hero text
+            gsap.from('.hero h1', {
+                duration: 1.5,
+                y: -50,
+                opacity: 0,
+                ease: "power2.out"
+            });
+            
+            gsap.from('.hero p', {
+                duration: 1.5,
+                y: 50,
+                opacity: 0,
+                delay: 0.5,
+                ease: "power2.out"
+            });
+            
+            gsap.from('.cta-button', {
+                duration: 1,
+                y: 20,
+                opacity: 0,
+                delay: 1,
+                stagger: 0.2,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+</html>
